@@ -179,6 +179,86 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Dispatch password reset email via Supabase Auth
+  const resetPasswordForEmail = async (email) => {
+    try {
+      if (!isSupabaseConfigured() || !supabase) {
+        throw new Error('Supabase is not configured. Please check your .env credentials.');
+      }
+
+      const redirectTo = `${window.location.origin}/reset-password`;
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo,
+      });
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        data,
+        message: `Password reset instructions have been dispatched to ${email.trim()}. Please check your inbox and spam folder.`,
+      };
+    } catch (error) {
+      console.error('Reset password request error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Update password once recovery session or active user is confirmed
+  const updatePassword = async (newPassword) => {
+    try {
+      if (!isSupabaseConfigured() || !supabase) {
+        throw new Error('Supabase is not configured.');
+      }
+
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        setUser(data.user);
+      }
+
+      return {
+        success: true,
+        user: data.user,
+        message: 'Your password has been securely updated. You can now access your account with the new password.',
+      };
+    } catch (error) {
+      console.error('Update password error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Verify OTP recovery token for email-code based reset flows
+  const verifyOtpForRecovery = async ({ email, token }) => {
+    try {
+      if (!isSupabaseConfigured() || !supabase) {
+        throw new Error('Supabase is not configured.');
+      }
+
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: token.trim(),
+        type: 'recovery',
+      });
+
+      if (error) throw error;
+
+      setUser(data.user);
+      setSession(data.session);
+      if (data.session?.access_token) {
+        localStorage.setItem('ash_shifa_token', data.session.access_token);
+      }
+      return { success: true, user: data.user, session: data.session };
+    } catch (error) {
+      console.error('Verify recovery OTP error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -188,6 +268,9 @@ export const AuthProvider = ({ children }) => {
         signIn,
         signUp,
         signOut,
+        resetPasswordForEmail,
+        updatePassword,
+        verifyOtpForRecovery,
         isAuthenticated: !!user,
       }}
     >
