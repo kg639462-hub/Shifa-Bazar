@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ShoppingBag, User, LogOut, Package, ShieldCheck } from 'lucide-react';
+import {
+  Menu,
+  X,
+  ShoppingBag,
+  User,
+  LogOut,
+  Package,
+  ShieldCheck,
+  Truck,
+  Phone,
+  Sparkles,
+  MessageCircle,
+} from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import DispensaryLogo from './DispensaryLogo';
@@ -16,7 +28,41 @@ export default function Header() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-40 bg-[#f0faf4]/95 backdrop-blur-md border-b border-[#e2ece5]">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#d6e8dd] shadow-xs">
+      {/* Top Value Announcement Bar */}
+      <div className="bg-[#062316] text-[#dcfce7] text-[11px] sm:text-xs py-1.5 px-4 font-medium border-b border-emerald-950">
+        <div className="w-full max-w-[1440px] 2xl:max-w-[1536px] mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 overflow-hidden text-ellipsis whitespace-nowrap">
+            <span className="flex items-center gap-1.5 font-bold text-white">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>FREE Shipping</span>
+            </span>
+            <span className="text-emerald-500 hidden sm:inline">•</span>
+            <span className="hidden sm:inline text-emerald-200">
+              Orders over ₹499 across India
+            </span>
+            <span className="text-emerald-500 hidden md:inline">•</span>
+            <span className="hidden md:inline text-emerald-300">
+              ⚡ Health Bhi... Savings Bhi...
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              href="https://wa.me/919140403004?text=Hello%20Shifa%20Bazar,%20I%20want%20to%20order%20medicines"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-emerald-300 hover:text-white font-semibold transition-colors"
+              title="Order directly on WhatsApp"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">WhatsApp:</span>
+              <span>+91 91404 03004</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Top Main Navigation Bar */}
       <div className="w-full max-w-[1440px] 2xl:max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Left: Hamburger & Brand Logo */}

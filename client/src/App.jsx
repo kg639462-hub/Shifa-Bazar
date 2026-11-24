@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
+import WhatsAppButton from './components/common/WhatsAppButton';
 import HomePage from './pages/HomePage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CartPage from './pages/CartPage';
@@ -66,6 +67,9 @@ export default function App() {
 
             {/* Footer */}
             <Footer />
+
+            {/* Floating WhatsApp Quick Order Support */}
+            <WhatsAppButton />
           </div>
         </CartProvider>
       </AuthProvider>

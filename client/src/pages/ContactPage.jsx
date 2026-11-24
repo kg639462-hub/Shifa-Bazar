@@ -66,9 +66,9 @@ export default function ContactPage() {
             <div className="flex items-start gap-3">
               <Clock className="w-4 h-4 text-emerald-800 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-[#0a2e1e] block">Dispensing Hours</strong>
-                Mon–Fri: 8:00 AM – 6:00 PM PST<br />
-                {/* Cold-Pack Dispatches: Daily 11:00 AM */}
+                <strong className="text-[#0a2e1e] block">Support Hours</strong>
+                Mon–Sat: 9:00 AM – 8:00 PM IST<br />
+                WhatsApp: Available 24/7 for urgent orders
               </div>
             </div>
           </div>

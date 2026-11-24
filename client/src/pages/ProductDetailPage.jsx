@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Plus, Minus, Snowflake, Check, Award, AlertCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  Plus,
+  Minus,
+  Snowflake,
+  Check,
+  Award,
+  AlertCircle,
+  MessageCircle,
+  Truck,
+  ShieldCheck,
+} from 'lucide-react';
 import { getProductById } from '../api/products';
 import { useCart } from '../context/CartContext';
 import ProductGallery from '../components/product/ProductGallery';
@@ -254,7 +265,7 @@ export default function ProductDetailPage() {
               {/* Rectangular CTA button */}
               <button
                 onClick={handleAddToCart}
-                className={`flex-1 py-3 px-6 rounded-md font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all ${
+                className={`flex-1 py-3 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
                   addedSuccess
                     ? 'bg-emerald-700 text-white'
                     : 'bg-[#0a2e1e] hover:bg-[#072417] text-white active:scale-[0.99]'
@@ -263,15 +274,40 @@ export default function ProductDetailPage() {
                 {addedSuccess ? (
                   <>
                     <Check className="w-4 h-4" />
-                    Added to Dispensary Cart
+                    <span>Added to Cart</span>
                   </>
                 ) : (
                   <>
                     <Plus className="w-4 h-4" />
-                    Add to Dispensary Cart — ₹{totalCalculated}
+                    <span>Add to Cart — ₹{totalCalculated}</span>
                   </>
                 )}
               </button>
+            </div>
+
+            {/* Direct WhatsApp Quick Order */}
+            <a
+              href={`https://wa.me/919140403004?text=${encodeURIComponent(
+                `Hello Shifa Bazar, I would like to order ${product.name} (Quantity: ${quantity}, Price: ₹${totalCalculated}).`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 px-6 rounded-xl font-bold text-xs sm:text-sm bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center gap-2 shadow-sm transition-all"
+            >
+              <MessageCircle className="w-4 h-4 fill-white" />
+              <span>Direct Order on WhatsApp (+91 91404 03004)</span>
+            </a>
+
+            {/* Delivery Guarantee Pill */}
+            <div className="grid grid-cols-2 gap-2 pt-2 text-[11px] text-[#4b6356]">
+              <div className="flex items-center gap-1.5 bg-[#f0faf4] p-2.5 rounded-xl border border-[#d6e8dd]">
+                <Truck className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>Express Doorstep Delivery</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-[#f0faf4] p-2.5 rounded-xl border border-[#d6e8dd]">
+                <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>100% Genuine Medicine</span>
+              </div>
             </div>
 
             {/* Link to Cart if added */}
