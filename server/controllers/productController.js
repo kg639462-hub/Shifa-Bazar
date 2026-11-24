@@ -54,7 +54,7 @@ export const initialProducts = [
 export const normalizeProduct = (item) => {
   if (!item) return null;
 
-  // 1. Normalize Images (STRICT REQUIREMENT: Exactly 4 images)
+  // 1. Normalize Images (Keep genuine uploaded images)
   let rawImages = [];
   if (Array.isArray(item.images)) {
     rawImages = item.images.filter((img) => img && typeof img === 'string' && img.trim().length > 0);
@@ -64,10 +64,7 @@ export const normalizeProduct = (item) => {
     }
   }
 
-  const fourImages = rawImages.slice(0, 4);
-  while (fourImages.length < 4) {
-    fourImages.push(defaultMedicineImages[fourImages.length]);
-  }
+  const fourImages = rawImages;
 
   const name = item.name ? item.name.trim() : 'Therapeutic Remedy';
   const category = item.category ? item.category.trim() : 'Formulation';
@@ -407,9 +404,6 @@ export const createProduct = async (req, res) => {
     if (typeof images === 'string' && images.startsWith('http')) {
       rawImages = [images];
     }
-    while (rawImages.length < 4) {
-      rawImages.push(defaultMedicineImages[rawImages.length]);
-    }
 
     const newId = `prod-${Math.random().toString(36).substring(2, 9)}`;
 
@@ -430,7 +424,7 @@ export const createProduct = async (req, res) => {
       co_a_verified: true,
       rating: 5.0,
       reviews_count: 1,
-      images: rawImages.slice(0, 4),
+      images: rawImages,
       created_at: new Date().toISOString(),
     };
 
@@ -528,12 +522,8 @@ export const updateProduct = async (req, res) => {
     if (price !== undefined) updates.price = parseFloat(price);
     if (original_price !== undefined) updates.original_price = parseFloat(original_price);
 
-    if (images && Array.isArray(images) && images.length > 0) {
-      let cleaned = images.filter(Boolean);
-      while (cleaned.length < 4) {
-        cleaned.push(defaultMedicineImages[cleaned.length]);
-      }
-      updates.images = cleaned.slice(0, 4);
+    if (images && Array.isArray(images)) {
+      updates.images = images.filter(Boolean);
     }
 
     updates.updated_at = new Date().toISOString();

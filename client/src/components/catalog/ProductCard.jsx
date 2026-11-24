@@ -16,8 +16,7 @@ export default function ProductCard({ product }) {
   };
 
   const primaryImage =
-    (product.images && product.images[0]) ||
-    'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80';
+    (product.images && product.images[0]) || '/originallogo.png';
 
   // Calculate prices and discount
   const sellingPrice = Number(product.price) || 0;

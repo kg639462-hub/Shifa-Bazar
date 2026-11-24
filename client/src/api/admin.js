@@ -2,13 +2,8 @@ import { apiRequest } from './client';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getProducts } from './products';
 
-// Fallback high-res clinical imagery (strictly 4 images)
-export const defaultProductImages = [
-  'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1577401239170-897942555fb3?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1550572017-edd951b55104?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=800&q=80',
-];
+// Default fallback imagery (empty by default - only user uploaded images used)
+export const defaultProductImages = [];
 
 /**
  * Compress an image file using browser Canvas before upload
@@ -145,7 +140,7 @@ export async function createAdminProduct(productData) {
         dosage: productData.dosage || 'Take as advised.',
         ingredients: Array.isArray(productData.ingredients) ? productData.ingredients : [productData.ingredients],
         co_a_verified: true,
-        images: productData.images || defaultProductImages,
+        images: Array.isArray(productData.images) ? productData.images.filter(Boolean) : [],
         created_at: new Date().toISOString(),
       };
       const { data, error } = await supabase.from('products').insert([payload]).select().single();
@@ -160,7 +155,7 @@ export async function createAdminProduct(productData) {
     id: `prod-${Math.random().toString(36).substring(2, 9)}`,
     price: Number(productData.price) || 0,
     stock: Number(productData.stock) || 100,
-    images: productData.images || defaultProductImages,
+    images: Array.isArray(productData.images) ? productData.images.filter(Boolean) : [],
   };
 }
 

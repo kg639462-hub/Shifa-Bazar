@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Plus, Minus, Snowflake, Check, Award, AlertCircle, Edit3, Loader2 } from 'lucide-react';
-import { getProductById, updateProductPrice } from '../api/products';
+import { ArrowLeft, Plus, Minus, Snowflake, Check, Award, AlertCircle } from 'lucide-react';
+import { getProductById } from '../api/products';
 import { useCart } from '../context/CartContext';
 import ProductGallery from '../components/product/ProductGallery';
 
@@ -12,12 +12,6 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [addedSuccess, setAddedSuccess] = useState(false);
-
-  // Backend Price Editor State
-  const [isEditingPrice, setIsEditingPrice] = useState(false);
-  const [newPriceInput, setNewPriceInput] = useState('');
-  const [updatingPrice, setUpdatingPrice] = useState(false);
-  const [priceUpdateMessage, setPriceUpdateMessage] = useState('');
 
   useEffect(() => {
     async function loadProduct() {
@@ -65,26 +59,6 @@ export default function ProductDetailPage() {
     addToCart(product, quantity);
     setAddedSuccess(true);
     setTimeout(() => setAddedSuccess(false), 2000);
-  };
-
-  const handleSaveBackendPrice = async (e) => {
-    e.preventDefault();
-    if (!newPriceInput) return;
-    setUpdatingPrice(true);
-    setPriceUpdateMessage('');
-
-    try {
-      const res = await updateProductPrice(product.id, parseFloat(newPriceInput));
-      if (res.success && res.product) {
-        setProduct({ ...product, price: Number(res.product.price) });
-        setPriceUpdateMessage(res.message);
-        setIsEditingPrice(false);
-      }
-    } catch (err) {
-      setPriceUpdateMessage('Error updating price: ' + err.message);
-    } finally {
-      setUpdatingPrice(false);
-    }
   };
 
   const sellingPrice = Number(product.price) || 0;
@@ -206,64 +180,15 @@ export default function ProductDetailPage() {
                 </span>
               </div>
 
-              {/* Savings callout & Set Price link */}
-              <div className="flex items-center justify-between text-xs pt-0.5">
-                {discountPercent > 0 && (
+              {/* Savings callout */}
+              {discountPercent > 0 && (
+                <div className="text-xs pt-0.5">
                   <p className="text-emerald-800 font-semibold flex items-center gap-1">
                     <span>🎉</span> You save ₹{formattedSavings} ({discountPercent}% off retail price)
                   </p>
-                )}
-
-                {/* Backend Price Trigger Button */}
-                <button
-                  onClick={() => {
-                    setIsEditingPrice(!isEditingPrice);
-                    setNewPriceInput(product.price);
-                  }}
-                  className="text-[11px] font-semibold text-emerald-800 hover:text-emerald-950 flex items-center gap-1 underline underline-offset-2 ml-auto"
-                  title="Update remedy price in Supabase via backend"
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  <span>Set Price (Backend)</span>
-                </button>
-              </div>
+                </div>
+              )}
             </div>
-
-            {/* Price Update Form */}
-            {isEditingPrice && (
-              <form onSubmit={handleSaveBackendPrice} className="mt-3 p-3 bg-[#f0faf4] border border-[#d6e8dd] rounded-md flex items-center gap-2 text-xs">
-                <span className="font-bold text-[#0a2e1e]">New Price: ₹</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  required
-                  value={newPriceInput}
-                  onChange={(e) => setNewPriceInput(e.target.value)}
-                  className="w-24 bg-white border border-[#d6e8dd] rounded-sm px-2 py-1 text-[#0a2e1e] font-bold"
-                />
-                <button
-                  type="submit"
-                  disabled={updatingPrice}
-                  className="bg-[#0a2e1e] text-white px-3 py-1 rounded-sm font-semibold hover:bg-[#072417] flex items-center gap-1 disabled:opacity-50"
-                >
-                  {updatingPrice && <Loader2 className="w-3 h-3 animate-spin" />}
-                  Save via Backend
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsEditingPrice(false)}
-                  className="text-gray-500 hover:text-gray-700 px-1"
-                >
-                  Cancel
-                </button>
-              </form>
-            )}
-
-            {priceUpdateMessage && (
-              <p className="mt-2 text-xs font-semibold text-emerald-800">
-                {priceUpdateMessage}
-              </p>
-            )}
           </div>
 
           {/* Description */}

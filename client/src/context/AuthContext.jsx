@@ -39,9 +39,14 @@ export const AuthProvider = ({ children }) => {
             }
           }
 
-          // Listen for Supabase auth state changes (SIGN_IN, SIGN_OUT, TOKEN_REFRESHED)
+          // Listen for Supabase auth state changes (SIGN_IN, SIGN_OUT, TOKEN_REFRESHED, PASSWORD_RECOVERY)
           const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            (_event, updatedSession) => {
+            (event, updatedSession) => {
+              if (event === 'PASSWORD_RECOVERY') {
+                if (!window.location.pathname.startsWith('/reset-password')) {
+                  window.location.href = `/reset-password${window.location.search}${window.location.hash}`;
+                }
+              }
               if (mounted) {
                 setSession(updatedSession);
                 setUser(updatedSession?.user ?? null);
@@ -186,12 +191,23 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Supabase is not configured. Please check your .env credentials.');
       }
 
-      const redirectTo = `${window.location.origin}/reset-password`;
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const redirectTo = isLocal
+        ? `${window.location.origin}/reset-password`
+        : 'https://shifabazar.in/reset-password';
+
       const { data, error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.toLowerCase().includes('rate limit')) {
+          throw new Error(
+            'Security cooldown active: Supabase limits email sends to prevent spam. Please wait 60 seconds before trying again, or check your Gmail inbox and spam folder for the link already sent.'
+          );
+        }
+        throw error;
+      }
 
       return {
         success: true,

@@ -55,6 +55,22 @@ export default function ResetPasswordPage() {
           return;
         }
 
+        // Check if error parameter exists in hash (e.g. otp_expired or invalid link)
+        if (window.location.hash.includes('error=')) {
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const errorDesc = hashParams.get('error_description');
+          if (errorDesc) {
+            setError(decodeURIComponent(errorDesc).replace(/\+/g, ' '));
+          } else {
+            setError('This password reset link has expired or has already been used. Please request a fresh link below.');
+          }
+          if (mounted) {
+            setCheckingSession(false);
+            setHasValidSession(false);
+          }
+          return;
+        }
+
         // Check if URL has PKCE 'code' query param
         const queryParams = new URLSearchParams(window.location.search);
         const code = queryParams.get('code');

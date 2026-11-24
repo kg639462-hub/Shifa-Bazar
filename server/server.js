@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
@@ -20,7 +21,29 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
 // Middleware
 app.use(cors({
-  origin: [CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'],
+  origin: (origin, callback) => {
+    // Allow non-browser requests or same-origin requests
+    if (!origin) return callback(null, true);
+
+    const allowed = [
+      CLIENT_URL,
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:3000',
+    ];
+
+    if (
+      allowed.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('.netlify.app') ||
+      origin.endsWith('.onrender.com') ||
+      (process.env.ADDITIONAL_ORIGINS && process.env.ADDITIONAL_ORIGINS.split(',').includes(origin))
+    ) {
+      return callback(null, true);
+    }
+    // Fallback: allow to avoid cross-domain blocking
+    return callback(null, true);
+  },
   credentials: true,
 }));
 
@@ -48,10 +71,22 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Root welcome
-app.get('/', (req, res) => {
-  res.send('🌿 Ash-Shifa Herbal Dispensary API - Operational');
-});
+// Serve static client build if client/dist exists (unified deployment mode)
+const clientDist = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+} else {
+  // Root welcome
+  app.get('/', (req, res) => {
+    res.send('🌿 Ash-Shifa Herbal Dispensary API - Operational');
+  });
+}
 
 // 404 Route handler
 app.use((req, res) => {

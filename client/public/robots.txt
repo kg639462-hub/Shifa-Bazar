@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://www.shifabazar.in/sitemap.xml
+Sitemap: https://shifabazar.in/sitemap.xml

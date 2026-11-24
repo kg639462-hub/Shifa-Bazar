@@ -2,13 +2,8 @@ import { apiRequest } from './client';
 import { sampleProducts } from '../data/sampleProducts';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
-// Fallback images strictly 4
-const defaultImages = [
-  'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1577401239170-897942555fb3?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1550572017-edd951b55104?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=800&q=80',
-];
+// Fallback default empty array - only genuinely uploaded images used
+const defaultImages = [];
 
 const normalizeClientProduct = (p) => {
   if (!p) return null;
@@ -18,10 +13,7 @@ const normalizeClientProduct = (p) => {
       rawImages = [p.images];
     }
   }
-  const fourImages = rawImages.slice(0, 4);
-  while (fourImages.length < 4) {
-    fourImages.push(defaultImages[fourImages.length]);
-  }
+  const productImages = rawImages;
 
   const name = p.name ? p.name.trim() : 'Therapeutic Remedy';
   const category = p.category ? p.category.trim() : 'Formulation';
@@ -56,7 +48,7 @@ const normalizeClientProduct = (p) => {
     co_a_verified: p.co_a_verified !== false,
     rating: Number(p.rating) || 4.9,
     reviews_count: Number(p.reviews_count) || 28,
-    images: fourImages,
+    images: productImages,
   };
 };
 

@@ -661,7 +661,7 @@ export default function AdminPage() {
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden shrink-0">
                                 <img
-                                  src={p.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80'}
+                                  src={p.images?.[0] || '/originallogo.png'}
                                   alt={p.name}
                                   className="w-full h-full object-cover"
                                 />

@@ -753,7 +753,7 @@ export default function Footer() {
             {/* Left Side: Copyright */}
             <div className="space-y-1">
               <p className="text-slate-300">
-                © 2026 <strong className="text-white font-serif">Ash-Shifa Herbal Dispensary</strong>. All Rights Reserved.
+                © 2026 <strong className="text-white font-serif">Shifa Bazar</strong>. All Rights Reserved.
               </p>
               <p className="text-[11px] text-slate-500">
                 Pure classical botanical pharmacotherapy curated by licensed Ayurvedic and Unani practitioners.

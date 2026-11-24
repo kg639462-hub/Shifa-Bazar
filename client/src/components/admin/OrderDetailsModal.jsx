@@ -733,7 +733,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order, onUpdateStat
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden shrink-0">
                         <img
-                          src={item.product_image || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80'}
+                          src={item.product_image || (item.images && item.images[0]) || '/originallogo.png'}
                           alt={item.product_name}
                           className="w-full h-full object-cover"
                         />

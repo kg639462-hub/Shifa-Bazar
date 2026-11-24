@@ -192,9 +192,7 @@ export default function OrderCard({ order, onUpdateOrder }) {
               <div className="w-16 h-12 rounded-sm overflow-hidden bg-[#f0faf4] border border-[#e2ece5] shrink-0">
                 <img
                   src={
-                    item.product_image ||
-                    (item.images && item.images[0]) ||
-                    'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=400&q=80'
+                    item.product_image || (item.images && item.images[0]) || '/originallogo.png'
                   }
                   alt={item.product_name || item.name}
                   className="w-full h-full object-cover"

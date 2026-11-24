@@ -6,8 +6,7 @@ export default function CartItem({ item }) {
   const { updateQuantity, removeFromCart } = useCart();
 
   const primaryImage =
-    (item.images && item.images[0]) ||
-    'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80';
+    (item.images && item.images[0]) || '/originallogo.png';
 
   const itemTotal = (Number(item.price) * item.quantity).toLocaleString('en-IN', {
     minimumFractionDigits: 2,
