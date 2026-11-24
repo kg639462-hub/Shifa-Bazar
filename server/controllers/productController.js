@@ -428,6 +428,11 @@ export const createProduct = async (req, res) => {
       created_at: new Date().toISOString(),
     };
 
+    const paddedImages = [...rawImages.slice(0, 4)];
+    while (paddedImages.length < 4) {
+      paddedImages.push('');
+    }
+
     const client = adminSupabase || supabase;
     if (isSupabaseConfigured() && client) {
       try {
@@ -442,7 +447,7 @@ export const createProduct = async (req, res) => {
           dosage: newProduct.dosage,
           ingredients: newProduct.ingredients,
           co_a_verified: newProduct.co_a_verified,
-          images: newProduct.images,
+          images: paddedImages,
           created_at: newProduct.created_at,
         };
 
@@ -523,7 +528,11 @@ export const updateProduct = async (req, res) => {
     if (original_price !== undefined) updates.original_price = parseFloat(original_price);
 
     if (images && Array.isArray(images)) {
-      updates.images = images.filter(Boolean);
+      const padded = [...images.filter(Boolean).slice(0, 4)];
+      while (padded.length < 4) {
+        padded.push('');
+      }
+      updates.images = padded;
     }
 
     updates.updated_at = new Date().toISOString();

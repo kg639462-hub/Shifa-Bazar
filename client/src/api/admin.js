@@ -6,6 +6,22 @@ import { getProducts } from './products';
 export const defaultProductImages = [];
 
 /**
+ * Format images array for Supabase table
+ * Ensures PostgreSQL check constraint (array_length = 4) is satisfied
+ * while keeping empty strings for unused slots so front-end displays only genuine photos
+ */
+export function formatImagesForDb(images) {
+  const clean = Array.isArray(images)
+    ? images.filter((img) => img && typeof img === 'string' && img.trim().length > 0)
+    : [];
+  const padded = [...clean.slice(0, 4)];
+  while (padded.length < 4) {
+    padded.push('');
+  }
+  return padded;
+}
+
+/**
  * Compress an image file using browser Canvas before upload
  * Keeps dimensions within max 1200x1200px and quality 0.85 (clean & lightweight ~60-120KB)
  */
@@ -112,113 +128,142 @@ export async function getAdminProducts() {
 }
 
 /**
- * Create a new product in Supabase via backend API
+ * Create a new product directly in Supabase (with backend sync)
  */
 export async function createAdminProduct(productData) {
-  try {
-    const res = await apiRequest('/products', {
-      method: 'POST',
-      body: JSON.stringify(productData),
-    });
-    if (res.success && res.product) return res.product;
-  } catch (err) {
-    console.warn('Backend createAdminProduct notice, trying direct Supabase:', err.message);
-  }
+  const newId = `prod-${Math.random().toString(36).substring(2, 9)}`;
+  const formattedImages = formatImagesForDb(productData.images);
 
-  // Direct Supabase fallback
+  const payload = {
+    id: newId,
+    name: productData.name.trim(),
+    category: productData.category || 'Formulation',
+    price: Number(productData.price) || 0,
+    original_price: productData.original_price ? Number(productData.original_price) : Math.round(Number(productData.price) * 1.25),
+    stock: Number(productData.stock) || 100,
+    extract_type: productData.extract_type || (productData.category === 'Syrup' ? '100 ml' : '10 Tablets Strip'),
+    dosage: productData.dosage || 'As directed by healthcare advisor.',
+    ingredients: Array.isArray(productData.ingredients) && productData.ingredients.length > 0
+      ? productData.ingredients
+      : ['Active Botanical Extracts'],
+    co_a_verified: true,
+    images: formattedImages,
+    created_at: new Date().toISOString(),
+  };
+
+  // 1. Direct Supabase Query (Fastest, saves directly to live database)
   if (isSupabaseConfigured() && supabase) {
-    try {
-      const newId = `prod-${Math.random().toString(36).substring(2, 9)}`;
-      const payload = {
-        id: newId,
-        name: productData.name,
-        category: productData.category || 'Formulation',
-        price: Number(productData.price) || 0,
-        original_price: productData.original_price ? Number(productData.original_price) : Math.round(Number(productData.price) * 1.25),
-        stock: Number(productData.stock) || 100,
-        extract_type: productData.extract_type || 'Formulation',
-        dosage: productData.dosage || 'Take as advised.',
-        ingredients: Array.isArray(productData.ingredients) ? productData.ingredients : [productData.ingredients],
-        co_a_verified: true,
-        images: Array.isArray(productData.images) ? productData.images.filter(Boolean) : [],
-        created_at: new Date().toISOString(),
-      };
-      const { data, error } = await supabase.from('products').insert([payload]).select().single();
-      if (!error && data) return data;
-    } catch (e) {
-      console.warn('Direct Supabase product insert fallback notice:', e.message);
+    const { data, error } = await supabase.from('products').insert([payload]).select().single();
+    if (!error && data) {
+      // Background sync to backend if online
+      apiRequest('/products', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+      return data;
+    }
+    if (error) {
+      console.error('Direct Supabase insert error:', error);
+      throw new Error(error.message || 'Failed to save product in Supabase');
     }
   }
 
-  return {
-    ...productData,
-    id: `prod-${Math.random().toString(36).substring(2, 9)}`,
-    price: Number(productData.price) || 0,
-    stock: Number(productData.stock) || 100,
-    images: Array.isArray(productData.images) ? productData.images.filter(Boolean) : [],
-  };
+  // 2. Fallback via backend Express API
+  try {
+    const res = await apiRequest('/products', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    if (res.success && res.product) return res.product;
+  } catch (err) {
+    console.error('Backend createAdminProduct error:', err.message);
+    throw new Error(err.message || 'Failed to save product via backend');
+  }
+
+  return payload;
 }
 
 /**
  * Update an existing product
  */
 export async function updateAdminProduct(id, productData) {
-  try {
-    const res = await apiRequest(`/products/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(productData),
-    });
-    if (res.success && res.product) return res.product;
-  } catch (err) {
-    console.warn('Backend updateAdminProduct notice, trying direct Supabase:', err.message);
-  }
+  const formattedImages = formatImagesForDb(productData.images);
 
+  const updates = {
+    name: productData.name,
+    category: productData.category,
+    price: Number(productData.price),
+    original_price: productData.original_price ? Number(productData.original_price) : undefined,
+    stock: Number(productData.stock),
+    extract_type: productData.extract_type,
+    dosage: productData.dosage,
+    images: formattedImages,
+    updated_at: new Date().toISOString(),
+  };
+
+  // 1. Direct Supabase
   if (isSupabaseConfigured() && supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .update({
-          name: productData.name,
-          category: productData.category,
-          price: Number(productData.price),
-          stock: Number(productData.stock),
-          extract_type: productData.extract_type,
-          dosage: productData.dosage,
-          images: productData.images,
-        })
-        .eq('id', id)
-        .select()
-        .single();
+    const { data, error } = await supabase
+      .from('products')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
 
-      if (!error && data) return data;
-    } catch (e) {
-      console.warn('Direct Supabase product update notice:', e.message);
+    if (!error && data) {
+      apiRequest(`/products/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates),
+      }).catch(() => {});
+      return data;
+    }
+    if (error) {
+      console.error('Supabase update error:', error);
+      throw new Error(error.message || 'Failed to update product in database');
     }
   }
 
-  return { id, ...productData };
+  // 2. Fallback via backend API
+  try {
+    const res = await apiRequest(`/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ ...productData, images: formattedImages }),
+    });
+    if (res.success && res.product) return res.product;
+  } catch (err) {
+    console.error('Backend update product error:', err.message);
+    throw new Error(err.message || 'Failed to update product');
+  }
+
+  return { id, ...productData, images: formattedImages };
 }
 
 /**
  * Delete a product
  */
 export async function deleteAdminProduct(id) {
+  // 1. Direct Supabase
+  if (isSupabaseConfigured() && supabase) {
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (!error) {
+      apiRequest(`/products/${id}`, { method: 'DELETE' }).catch(() => {});
+      return true;
+    }
+    if (error) {
+      console.error('Supabase delete error:', error);
+      throw new Error(error.message || 'Failed to delete product from database');
+    }
+  }
+
+  // 2. Fallback via backend API
   try {
     const res = await apiRequest(`/products/${id}`, {
       method: 'DELETE',
     });
     if (res.success) return true;
   } catch (err) {
-    console.warn('Backend deleteAdminProduct notice, trying direct Supabase:', err.message);
-  }
-
-  if (isSupabaseConfigured() && supabase) {
-    try {
-      const { error } = await supabase.from('products').delete().eq('id', id);
-      if (!error) return true;
-    } catch (e) {
-      console.warn('Direct Supabase delete notice:', e.message);
-    }
+    console.error('Backend delete error:', err.message);
+    throw new Error(err.message || 'Failed to delete product');
   }
 
   return true;
