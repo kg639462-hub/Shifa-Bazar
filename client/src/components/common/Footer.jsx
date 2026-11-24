@@ -495,7 +495,7 @@ export default function Footer() {
               </div>
 
               {/* Regulatory Notice Card */}
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 space-y-1">
+              {/* <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 space-y-1">
                 <div className="flex items-center gap-1.5 text-teal-300 font-semibold">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Licensed Botanical Pharmacopeia</span>
@@ -503,7 +503,7 @@ export default function Footer() {
                 <p className="leading-snug">
                   Ayush Dispensary License: <strong className="text-slate-200 font-mono">AYUR/DISP/2026/089</strong>
                 </p>
-              </div>
+              </div> */}
             </div>
 
             {/* COLUMN 2 – QUICK LINKS (lg:col-span-2) */}
@@ -846,7 +846,7 @@ export default function Footer() {
             {/* Modal Footer */}
             <div className="bg-[#071912] px-6 py-4 border-t border-white/10 flex items-center justify-between">
               <span className="text-[11px] text-slate-400 font-mono">
-                AYUR/DISP/2026/089
+              
               </span>
               <button
                 onClick={() => setActivePolicyKey(null)}
