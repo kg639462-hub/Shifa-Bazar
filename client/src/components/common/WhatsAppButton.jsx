@@ -2,7 +2,7 @@ import React from 'react';
 import { MessageCircle } from 'lucide-react';
 
 export default function WhatsAppButton() {
-  const whatsappUrl = 'https://wa.me/919140403004?text=Hello%20Shifa%20Bazar,%20I%20would%20like%20to%20order%20medicines';
+  const whatsappUrl = 'https://wa.me/918899903777?text=Hello%20Shifa%20Bazar,%20I%20would%20like%20to%20order%20medicines';
 
   return (
     <aside aria-label="Customer Support and Direct Orders" className="fixed bottom-5 right-5 z-40 group">

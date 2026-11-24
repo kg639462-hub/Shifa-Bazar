@@ -170,7 +170,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h2 className="text-xs sm:text-sm font-bold text-white">Free Delivery</h2>
-                <p className="text-[11px] text-emerald-200/70">On orders above ₹499</p>
+                <p className="text-[11px] text-emerald-200/70">Delivery also free</p>
               </div>
             </div>
 
@@ -190,7 +190,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h2 className="text-xs sm:text-sm font-bold text-white">WhatsApp Order</h2>
-                <p className="text-[11px] text-emerald-200/70">+91 91404 03004</p>
+                <p className="text-[11px] text-emerald-200/70">+91 8899903777</p>
               </div>
             </div>
           </div>
@@ -215,7 +215,7 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <a
-              href="https://wa.me/919140403004?text=Hello%20Shifa%20Bazar,%20I%20want%20to%20order%20the%20Health%20Tonic%20offer"
+              href="https://wa.me/918899903777?text=Hello%20Shifa%20Bazar,%20I%20want%20to%20order%20the%20Health%20Tonic%20offer"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-white hover:bg-emerald-50 text-[#0a2e1e] font-bold text-xs sm:text-sm px-5 py-3 rounded-xl shadow-md transition-all flex items-center gap-2"

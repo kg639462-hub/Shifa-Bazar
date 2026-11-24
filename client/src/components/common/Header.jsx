@@ -39,7 +39,7 @@ export default function Header() {
             </span>
             <span className="text-emerald-500 hidden sm:inline">•</span>
             <span className="hidden sm:inline text-emerald-200">
-              Orders over ₹499 across India
+            
             </span>
             <span className="text-emerald-500 hidden md:inline">•</span>
             <span className="hidden md:inline text-emerald-300">
@@ -49,7 +49,7 @@ export default function Header() {
 
           <div className="flex items-center gap-3 shrink-0">
             <a
-              href="https://wa.me/919140403004?text=Hello%20Shifa%20Bazar,%20I%20want%20to%20order%20medicines"
+              href="https://wa.me/918899903777?text=Hello%20Shifa%20Bazar,%20I%20want%20to%20order%20medicines"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-emerald-300 hover:text-white font-semibold transition-colors"
@@ -57,7 +57,7 @@ export default function Header() {
             >
               <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
               <span className="hidden sm:inline">WhatsApp:</span>
-              <span>+91 91404 03004</span>
+              <span>+91 8899903777</span>
             </a>
           </div>
         </div>

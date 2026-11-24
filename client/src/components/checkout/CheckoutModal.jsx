@@ -10,7 +10,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
   const { cartItems, totalInvestment, subtotal, shippingFee, taxAmount, clearCart } = useCart();
   const { user, isAuthenticated } = useAuth();
 
-  const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' | 'cod'
+  const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod' default (razorpay option visible but unavailable)
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [orderCompleted, setOrderCompleted] = useState(null);
@@ -45,6 +45,11 @@ export default function CheckoutModal({ isOpen, onClose }) {
 
     if (!isAuthenticated) {
       setErrorMessage('Please sign in or register to record your prescription order with the dispensary.');
+      return;
+    }
+
+    if (paymentMethod !== 'cod') {
+      setErrorMessage('Online payment (UPI/Cards) is temporarily unavailable. Please select Cash on Delivery (COD) to place your order.');
       return;
     }
 
@@ -358,38 +363,40 @@ export default function CheckoutModal({ isOpen, onClose }) {
                 2. Select Payment Method
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Razorpay Option */}
-                <label
-                  className={`flex items-start gap-3 p-3.5 rounded-md border cursor-pointer transition-all ${
-                    paymentMethod === 'razorpay'
-                      ? 'border-[#0a2e1e] bg-[#f0faf4] ring-1 ring-[#0a2e1e]'
-                      : 'border-[#d6e8dd] hover:border-gray-400'
-                  }`}
+                {/* Razorpay Option - Visible but marked Not Available */}
+                <div
+                  className="relative flex items-start gap-3 p-3.5 rounded-xl border border-dashed border-gray-300 bg-gray-50/80 opacity-75 cursor-not-allowed select-none"
+                  title="Online Payment is temporarily under maintenance. Please use Cash on Delivery."
                 >
                   <input
                     type="radio"
                     name="paymentMethod"
                     value="razorpay"
+                    disabled
                     checked={paymentMethod === 'razorpay'}
-                    onChange={() => setPaymentMethod('razorpay')}
-                    className="mt-1 text-[#0a2e1e] focus:ring-emerald-800"
+                    className="mt-1 text-gray-400 cursor-not-allowed"
                   />
-                  <div>
-                    <div className="flex items-center gap-1.5 font-semibold text-xs text-[#0a2e1e]">
-                      <CreditCard className="w-4 h-4 text-emerald-800" />
-                      Razorpay (UPI / Cards / NetBanking)
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-1.5 font-semibold text-xs text-gray-700">
+                      <div className="flex items-center gap-1.5">
+                        <CreditCard className="w-4 h-4 text-gray-500" />
+                        <span>Online (UPI / Cards)</span>
+                      </div>
+                      <span className="bg-amber-100 text-amber-800 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                        Not Available
+                      </span>
                     </div>
-                    <p className="text-[11px] text-[#4b6356] mt-0.5">
-                      Instant secure payment in Indian Rupees (₹). Supports Google Pay, PhonePe, Paytm & cards.
+                    <p className="text-[11px] text-gray-500 mt-1">
+                      Online gateway temporarily under maintenance. Please choose Cash on Delivery (COD).
                     </p>
                   </div>
-                </label>
+                </div>
 
-                {/* Cash on Delivery Option */}
+                {/* Cash on Delivery Option - Active & Recommended */}
                 <label
-                  className={`flex items-start gap-3 p-3.5 rounded-md border cursor-pointer transition-all ${
+                  className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                     paymentMethod === 'cod'
-                      ? 'border-[#0a2e1e] bg-[#f0faf4] ring-1 ring-[#0a2e1e]'
+                      ? 'border-[#0a2e1e] bg-[#f0faf4] ring-2 ring-[#0a2e1e]/20 shadow-xs'
                       : 'border-[#d6e8dd] hover:border-gray-400'
                   }`}
                 >
@@ -401,13 +408,18 @@ export default function CheckoutModal({ isOpen, onClose }) {
                     onChange={() => setPaymentMethod('cod')}
                     className="mt-1 text-[#0a2e1e] focus:ring-emerald-800"
                   />
-                  <div>
-                    <div className="flex items-center gap-1.5 font-semibold text-xs text-[#0a2e1e]">
-                      <Banknote className="w-4 h-4 text-emerald-800" />
-                      Cash on Delivery (COD)
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-1.5 font-semibold text-xs text-[#0a2e1e]">
+                      <div className="flex items-center gap-1.5">
+                        <Banknote className="w-4 h-4 text-emerald-800" />
+                        <span>Cash on Delivery (COD)</span>
+                      </div>
+                      <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                        Active
+                      </span>
                     </div>
-                    <p className="text-[11px] text-[#4b6356] mt-0.5">
-                      Pay ₹{formattedTotal} in cash or UPI at the time of doorstep delivery.
+                    <p className="text-[11px] text-[#4b6356] mt-1">
+                      Pay ₹{formattedTotal} in cash or UPI to the delivery courier when your package arrives at your doorstep.
                     </p>
                   </div>
                 </label>

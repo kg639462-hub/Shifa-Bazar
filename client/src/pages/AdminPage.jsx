@@ -22,6 +22,8 @@ import {
   MailCheck,
   Printer,
   Navigation,
+  MessageSquare,
+  MessageCircle,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
@@ -34,6 +36,7 @@ import {
   updateAdminOrderStatus,
   getAdminCustomers,
 } from '../api/admin';
+import { getInquiries, deleteInquiry } from '../api/inquiries';
 import ProductFormModal from '../components/admin/ProductFormModal';
 import OrderDetailsModal from '../components/admin/OrderDetailsModal';
 import CustomerDetailsModal from '../components/admin/CustomerDetailsModal';
@@ -52,6 +55,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Filters & Search
@@ -61,6 +65,7 @@ export default function AdminPage() {
   const [orderStatusFilter, setOrderStatusFilter] = useState('All');
   const [paymentFilter, setPaymentFilter] = useState('All');
   const [customerSearch, setCustomerSearch] = useState('');
+  const [inquirySearch, setInquirySearch] = useState('');
 
   // Modals state
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -135,14 +140,16 @@ export default function AdminPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [prodsData, ordersData, custsData] = await Promise.all([
+      const [prodsData, ordersData, custsData, inqsData] = await Promise.all([
         getAdminProducts(),
         getAdminOrders(),
         getAdminCustomers(),
+        getInquiries(),
       ]);
       setProducts(prodsData || []);
       setOrders(ordersData || []);
       setCustomers(custsData || []);
+      setInquiries(inqsData || []);
     } catch (err) {
       console.error('Error loading admin portal data:', err);
     } finally {
@@ -170,6 +177,13 @@ export default function AdminPage() {
     await deleteAdminProduct(id);
     await loadData();
     setDeleteConfirmId(null);
+  };
+
+  const handleDeleteInquiry = async (id) => {
+    if (window.confirm('Are you sure you want to delete this customer inquiry?')) {
+      await deleteInquiry(id);
+      setInquiries((prev) => prev.filter((inq) => inq.id !== id));
+    }
   };
 
   // Order Actions
@@ -268,6 +282,19 @@ export default function AdminPage() {
       (c.name || '').toLowerCase().includes(customerSearch.toLowerCase()) ||
       (c.phone || '').includes(customerSearch) ||
       (c.email || '').toLowerCase().includes(customerSearch.toLowerCase())
+    );
+  });
+
+  // Filtered Inquiries
+  const filteredInquiries = inquiries.filter((inq) => {
+    const q = inquirySearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (inq.name || '').toLowerCase().includes(q) ||
+      (inq.phone || '').includes(q) ||
+      (inq.email || '').toLowerCase().includes(q) ||
+      (inq.subject || '').toLowerCase().includes(q) ||
+      (inq.message || '').toLowerCase().includes(q)
     );
   });
 
@@ -382,6 +409,7 @@ export default function AdminPage() {
             { id: 'orders', label: `Orders (${orders.length})`, icon: ShoppingBag },
             { id: 'payments', label: 'Payment Ledger', icon: CreditCard },
             { id: 'customers', label: `Customers (${customers.length})`, icon: User },
+            { id: 'inquiries', label: `Inquiries (${inquiries.length})`, icon: MessageSquare },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -1231,6 +1259,132 @@ export default function AdminPage() {
                         </td>
                       </tr>
                     ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 6: CUSTOMER INQUIRIES FROM CONTACT US */}
+      {activeTab === 'inquiries' && (
+        <div className="space-y-4">
+          {/* Inquiry Controls */}
+          <div className="bg-white p-4 rounded-xl border border-[#e2ece5] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative flex-1 w-full max-w-md">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Search inquiries by name, phone, email, subject..."
+                value={inquirySearch}
+                onChange={(e) => setInquirySearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 bg-[#f8faf9] border border-[#d6e8dd] rounded-lg text-xs text-[#0a2e1e] focus:outline-emerald-800"
+              />
+            </div>
+
+            <button
+              onClick={loadData}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 rounded-lg text-xs font-semibold border border-emerald-200 transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Refresh Inquiries</span>
+            </button>
+          </div>
+
+          {/* Inquiries Table */}
+          <div className="bg-white rounded-xl border border-[#e2ece5] shadow-xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#f8faf9] text-gray-600 font-semibold border-b border-[#e2ece5]">
+                  <tr>
+                    <th className="py-3 px-4">Date & Time</th>
+                    <th className="py-3 px-4">Customer Name</th>
+                    <th className="py-3 px-4">Contact Info</th>
+                    <th className="py-3 px-4">Subject</th>
+                    <th className="py-3 px-4">Message / Query</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredInquiries.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="py-12 text-center text-gray-400">
+                        <MessageSquare className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                        <p className="font-semibold text-gray-600">No customer inquiries found</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">
+                          Inquiries submitted from the "Contact Us" page will automatically appear here.
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredInquiries.map((inq) => {
+                      const cleanPhone = (inq.phone || '').replace(/[^0-9]/g, '');
+                      const waPhone = cleanPhone.startsWith('91') ? cleanPhone : `91${cleanPhone}`;
+                      return (
+                        <tr key={inq.id} className="hover:bg-gray-50/80 transition-colors">
+                          <td className="py-3 px-4 whitespace-nowrap text-gray-500 font-mono text-[11px]">
+                            {new Date(inq.created_at || Date.now()).toLocaleString('en-IN', {
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            })}
+                          </td>
+                          <td className="py-3 px-4 font-bold text-[#0a2e1e]">
+                            {inq.name}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="space-y-1">
+                              {inq.phone && (
+                                <div className="flex items-center gap-1.5">
+                                  <a
+                                    href={`tel:${inq.phone}`}
+                                    className="font-medium text-[#0a2e1e] hover:underline"
+                                  >
+                                    {inq.phone}
+                                  </a>
+                                  <a
+                                    href={`https://wa.me/${waPhone}?text=${encodeURIComponent(
+                                      `Hello ${inq.name}, we received your inquiry regarding "${inq.subject}" on Shifa Bazar.`
+                                    )}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+                                    title="Reply on WhatsApp"
+                                  >
+                                    <MessageCircle className="w-3.5 h-3.5 fill-emerald-600 text-white" />
+                                  </a>
+                                </div>
+                              )}
+                              {inq.email && (
+                                <a
+                                  href={`mailto:${inq.email}?subject=${encodeURIComponent(`Re: ${inq.subject}`)}`}
+                                  className="text-gray-500 hover:text-emerald-800 text-[11px] block hover:underline"
+                                >
+                                  {inq.email}
+                                </a>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="font-semibold text-emerald-950 bg-emerald-50 px-2 py-0.5 rounded-sm border border-emerald-200">
+                              {inq.subject || 'General'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 max-w-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
+                            {inq.message}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <button
+                              onClick={() => handleDeleteInquiry(inq.id)}
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                              title="Delete inquiry"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>

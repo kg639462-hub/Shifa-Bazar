@@ -287,7 +287,7 @@ export default function ProductDetailPage() {
 
             {/* Direct WhatsApp Quick Order */}
             <a
-              href={`https://wa.me/919140403004?text=${encodeURIComponent(
+              href={`https://wa.me/918899903777?text=${encodeURIComponent(
                 `Hello Shifa Bazar, I would like to order ${product.name} (Quantity: ${quantity}, Price: ₹${totalCalculated}).`
               )}`}
               target="_blank"
@@ -295,7 +295,7 @@ export default function ProductDetailPage() {
               className="w-full py-3 px-6 rounded-xl font-bold text-xs sm:text-sm bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center gap-2 shadow-sm transition-all"
             >
               <MessageCircle className="w-4 h-4 fill-white" />
-              <span>Direct Order on WhatsApp (+91 91404 03004)</span>
+              <span>Direct Order on WhatsApp (+91 8899903777)</span>
             </a>
 
             {/* Delivery Guarantee Pill */}

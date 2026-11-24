@@ -710,7 +710,7 @@ export default function Footer() {
                     </a>{' '}
                     •{' '}
                     <a href="tel:+919123456789" className="text-slate-300 hover:text-teal-300 transition-colors">
-                      +91 91234 56789
+                      +91 9457503777
                     </a>
                   </div>
                 </div>
@@ -720,7 +720,7 @@ export default function Footer() {
                   <div>
                     <span className="text-[10px] text-slate-400 block uppercase font-semibold">Clinical Support Email</span>
                     <a href="mailto:support@ashshifa.in" className="text-white hover:text-teal-300 transition-colors font-medium">
-                      support@ashshifa.in
+                      info@shifabazar.in
                     </a>
                   </div>
                 </div>
@@ -836,7 +836,7 @@ export default function Footer() {
                 <p>
                   For inquiries or official verification regarding our clinical policies, email our compliance team at{' '}
                   <a href="mailto:support@ashshifa.in" className="text-teal-300 underline font-medium">
-                    support@ashshifa.in
+                    info@shifabazar.in
                   </a>{' '}
                   or phone <strong className="text-white">+91 8899903777</strong>.
                 </p>
